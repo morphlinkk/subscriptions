@@ -9,4 +9,9 @@ RUN go mod download
 COPY . .
 RUN go build -v -o /usr/local/bin/app ./cmd/api
 
-CMD ["app"]
+RUN go build -v -o /usr/local/bin/app-migrate ./cmd/migrate
+
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+CMD ["/usr/local/bin/entrypoint.sh"]

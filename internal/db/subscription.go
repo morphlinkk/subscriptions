@@ -60,21 +60,20 @@ func (q *Queries) AddSubscription(ctx context.Context, sub model.AddSubscription
 
 const updateSubscriptionQuery = `
 	UPDATE subscriptions
-	SET service_name = $1,
-	    price = $2,
-	    start_date = $3,
-	    end_date = $4
-	WHERE id = $5
+	SET 
+			service_name = COALESCE($1, service_name),
+			price        = COALESCE($2, price),
+			end_date     = COALESCE($3, end_date)
+	WHERE id = $4
 	RETURNING id, service_name, price, user_id, start_date, end_date
 `
 
-func (q *Queries) UpdateSubscription(ctx context.Context, sub model.Subscription) (model.Subscription, error) {
+func (q *Queries) UpdateSubscription(ctx context.Context, id int64, params model.UpdateSubscriptionParams) (model.Subscription, error) {
 	row := q.db.QueryRow(ctx, updateSubscriptionQuery,
-		sub.Service,
-		sub.Price,
-		sub.StartDate,
-		sub.EndDate,
-		sub.ID,
+		params.Service,
+		params.Price,
+		params.EndDate,
+		id,
 	)
 
 	var s model.Subscription

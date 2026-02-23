@@ -23,10 +23,17 @@ type AddSubscriptionParams struct {
 	EndDate   *time.Time `json:"end_date"`
 }
 
+type UpdateSubscriptionParams struct {
+	Service *string    `json:"service_name"`
+	Price   *int       `json:"price"`
+	UserID  *uuid.UUID `json:"user_id"`
+	EndDate *time.Time `json:"end_date"`
+}
+
 type ListSubscriptionsParams struct {
 	UserID *uuid.UUID
-	Limit  int32
-	Offset int32
+	Limit  int
+	Offset int
 }
 
 type SumOfSubscriptionPricesParams struct {

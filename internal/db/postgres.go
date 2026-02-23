@@ -12,6 +12,7 @@ import (
 
 type Store struct {
 	db *pgxpool.Pool
+	*Queries
 }
 
 var (
@@ -40,7 +41,7 @@ func NewStore(ctx context.Context, cfg config.Config) (*Store, error) {
 			return
 		}
 
-		storeInstance = &Store{db: pool}
+		storeInstance = &Store{db: pool, Queries: New(pool)}
 	})
 
 	return storeInstance, storeErr
@@ -54,4 +55,21 @@ func (s *Store) Close() {
 	if s.db != nil {
 		s.db.Close()
 	}
+}
+
+func (s *Store) ExecTx(ctx context.Context, fn func(*Queries) error) error {
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	q := s.Queries.WithTx(tx)
+	err = fn(q)
+	if err != nil {
+		if rbErr := tx.Rollback(ctx); rbErr != nil {
+			return fmt.Errorf("error during transaction: %v, rollback error: %v", err, rbErr)
+		}
+		return err
+	}
+	return tx.Commit(ctx)
 }

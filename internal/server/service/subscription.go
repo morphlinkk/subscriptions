@@ -55,7 +55,7 @@ func (s *subscriptionService) UpdateSubscription(ctx context.Context, id int64, 
 		return nil, errors.New("price must be positive")
 	}
 	if params.Service != nil && *params.Service == "" {
-		return nil, errors.New("service name is required")
+		return nil, errors.New("service name is provided but empty")
 	}
 	return s.repo.UpdateSubscription(ctx, id, &params)
 }

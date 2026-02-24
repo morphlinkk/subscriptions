@@ -3,11 +3,8 @@ package handler
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"github.com/morphlinkk/subscriptions/internal/model"
 	"github.com/morphlinkk/subscriptions/internal/server/service"
 )
 
@@ -30,19 +27,25 @@ func NewSubscriptionHandler(service service.SubscriptionService) SubscriptionHan
 }
 
 func (h *subscriptionHandler) AddSubscription(c *gin.Context) {
-	var req model.AddSubscriptionParams
+	var req AddSubscriptionRequest
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
 
-	sub, err := h.subscriptionService.AddSubscription(c.Request.Context(), req)
+	params, err := req.ToParams()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, sub)
+	sub, err := h.subscriptionService.AddSubscription(c.Request.Context(), params)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, ToSubscriptionResponse(*sub))
 }
 
 func (h *subscriptionHandler) GetSubscriptionByID(c *gin.Context) {
@@ -63,52 +66,49 @@ func (h *subscriptionHandler) GetSubscriptionByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, sub)
+	c.JSON(http.StatusOK, ToSubscriptionResponse(*sub))
 }
 
 func (h *subscriptionHandler) UpdateSubscription(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid subscription id"})
 		return
 	}
 
-	var req model.UpdateSubscriptionParams
+	var req UpdateSubscriptionRequest
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
 
-	sub, err := h.subscriptionService.UpdateSubscription(c.Request.Context(), id, req)
+	params, err := req.ToParams()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, sub)
+	sub, err := h.subscriptionService.UpdateSubscription(c.Request.Context(), id, params)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, ToSubscriptionResponse(*sub))
 }
 
 func (h *subscriptionHandler) ListSubscriptions(c *gin.Context) {
-	var params model.ListSubscriptionsParams
-
-	if limitStr := c.Query("limit"); limitStr != "" {
-		limit, err := strconv.Atoi(limitStr)
-		if err == nil {
-			params.Limit = limit
-		}
-	}
-	if offsetStr := c.Query("offset"); offsetStr != "" {
-		offset, err := strconv.Atoi(offsetStr)
-		if err == nil {
-			params.Offset = offset
-		}
+	var req ListSubscriptionsRequest
+	if err := c.BindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid query parameters"})
+		return
 	}
 
-	uid, err := uuid.Parse(c.Query("user_id"))
-	if err == nil {
-		params.UserID = &uid
+	params, err := req.ToParams()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	subs, err := h.subscriptionService.ListSubscriptions(c.Request.Context(), params)
@@ -117,42 +117,25 @@ func (h *subscriptionHandler) ListSubscriptions(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, subs)
+	responses := make([]SubscriptionResponse, len(subs))
+	for i, s := range subs {
+		responses[i] = ToSubscriptionResponse(s)
+	}
+
+	c.JSON(http.StatusOK, responses)
 }
 
 func (h *subscriptionHandler) GetSumOfSubscriptionPrices(c *gin.Context) {
-	var params model.SumOfSubscriptionPricesParams
-
-	if userID := c.Query("user_id"); userID != "" {
-		uid, err := uuid.Parse(userID)
-		if err == nil {
-			params.UserID = &uid
-		}
-	}
-	if serviceName := c.Query("service_name"); serviceName != "" {
-		params.ServiceName = &serviceName
-	}
-
-	startStr := c.Query("period_start")
-	if startStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "period_start is required"})
+	var req SumOfSubscriptionPricesRequest
+	if err := c.BindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid query parameters"})
 		return
 	}
-	start, err := time.Parse(time.RFC3339, startStr)
+
+	params, err := req.ToParams()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid period_start"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
-	}
-	params.PeriodStart = start
-
-	endStr := c.Query("period_end")
-	if endStr != "" {
-		end, err := time.Parse(time.RFC3339, endStr)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid period_end"})
-			return
-		}
-		params.PeriodEnd = &end
 	}
 
 	sum, err := h.subscriptionService.GetSumOfSubscriptionPrices(c.Request.Context(), params)
@@ -161,7 +144,5 @@ func (h *subscriptionHandler) GetSumOfSubscriptionPrices(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"total_price": sum,
-	})
+	c.JSON(http.StatusOK, gin.H{"total_price": sum})
 }

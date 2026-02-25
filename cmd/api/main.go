@@ -1,3 +1,9 @@
+// @title Subscriptions API
+// @version 1.0
+// @description API for managing user subscriptions
+// @host localhost:3000
+// @BasePath /
+
 package main
 
 import (

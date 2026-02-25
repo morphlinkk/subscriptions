@@ -7,11 +7,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/morphlinkk/subscriptions/cmd/api/docs"
 	"github.com/morphlinkk/subscriptions/internal/config"
 	"github.com/morphlinkk/subscriptions/internal/db"
 	"github.com/morphlinkk/subscriptions/internal/repository"
 	"github.com/morphlinkk/subscriptions/internal/server/handler"
 	"github.com/morphlinkk/subscriptions/internal/server/service"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Server struct {
@@ -71,6 +74,8 @@ func NewServer(conf *config.Config) (*gin.Engine, error) {
 
 	r := gin.Default()
 	r.SetTrustedProxies([]string{"localhost"})
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	subs := r.Group("/subscriptions")
 	{

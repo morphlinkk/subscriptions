@@ -92,7 +92,7 @@ func (q *Queries) UpdateSubscription(ctx context.Context, id int64, params model
 const listSubscriptionsPaginatedQuery = `
 	SELECT id, service_name, price, user_id, start_date, end_date
 	FROM subscriptions
-	WHERE ($1::uuid IS NULL OR user_id = $1)
+	WHERE (user_id = $1 OR $1 IS NULL)
 	ORDER BY start_date DESC
 	LIMIT $2 OFFSET $3
 `

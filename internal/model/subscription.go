@@ -7,27 +7,27 @@ import (
 )
 
 type Subscription struct {
-	ID        int64      `json:"id"`
-	Service   string     `json:"service_name"`
-	Price     int        `json:"price"`
-	UserID    uuid.UUID  `json:"user_id"`
-	StartDate time.Time  `json:"start_date"`
-	EndDate   *time.Time `json:"end_date"`
+	ID        int64
+	Service   string
+	Price     int
+	UserID    uuid.UUID
+	StartDate time.Time
+	EndDate   *time.Time
 }
 
 type AddSubscriptionParams struct {
-	Service   string     `json:"service_name"`
-	Price     int        `json:"price"`
-	UserID    uuid.UUID  `json:"user_id"`
-	StartDate time.Time  `json:"start_date"`
-	EndDate   *time.Time `json:"end_date"`
+	Service   string
+	Price     int
+	UserID    uuid.UUID
+	StartDate time.Time
+	EndDate   *time.Time
 }
 
 type UpdateSubscriptionParams struct {
-	Service *string    `json:"service_name"`
-	Price   *int       `json:"price"`
-	UserID  *uuid.UUID `json:"user_id"`
-	EndDate *time.Time `json:"end_date"`
+	Service *string
+	Price   *int
+	UserID  *uuid.UUID
+	EndDate *time.Time
 }
 
 type ListSubscriptionsParams struct {
@@ -40,5 +40,5 @@ type SumOfSubscriptionPricesParams struct {
 	UserID      *uuid.UUID
 	ServiceName *string
 	PeriodStart time.Time
-	PeriodEnd   *time.Time
+	PeriodEnd   time.Time
 }

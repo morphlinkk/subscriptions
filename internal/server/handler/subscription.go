@@ -111,7 +111,7 @@ func (h *subscriptionHandler) GetSubscriptionByID(c *gin.Context) {
 // @Success 200 {object} Response{data=SubscriptionResponse} "Updated"
 // @Failure 400 {object} Response "Invalid request or ID"
 // @Failure 500 {object} Response "Internal server error"
-// @Router /subscriptions/{id} [put]
+// @Router /subscriptions/{id} [patch]
 func (h *subscriptionHandler) UpdateSubscription(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -195,10 +195,10 @@ func (h *subscriptionHandler) ListSubscriptions(c *gin.Context) {
 // @Tags subscriptions
 // @Accept json
 // @Produce json
+// @Param period_start query string true "Period start MM-YYYY"
+// @Param period_end query string true "Period end MM-YYYY"
 // @Param user_id query string false "Filter by User ID"
 // @Param service_name query string false "Filter by Service name"
-// @Param period_start query string false "Period start MM-YYYY"
-// @Param period_end query string false "Period end MM-YYYY"
 // @Success 200 {object} Response{data=map[string]int64} "OK"
 // @Failure 400 {object} Response "Invalid query parameters"
 // @Failure 500 {object} Response "Internal server error"

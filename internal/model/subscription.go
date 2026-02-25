@@ -39,6 +39,6 @@ type ListSubscriptionsParams struct {
 type SumOfSubscriptionPricesParams struct {
 	UserID      *uuid.UUID
 	ServiceName *string
-	PeriodStart time.Time
-	PeriodEnd   time.Time
+	PeriodStart *time.Time
+	PeriodEnd   *time.Time
 }

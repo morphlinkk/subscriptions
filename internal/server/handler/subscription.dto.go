@@ -132,8 +132,8 @@ func (r ListSubscriptionsRequest) ToParams() (model.ListSubscriptionsParams, err
 type SumOfSubscriptionPricesRequest struct {
 	UserID      *string `form:"user_id"`
 	Service     *string `form:"service_name"`
-	PeriodStart string  `form:"period_start"` // MM-YYYY
-	PeriodEnd   string  `form:"period_end"`   // MM-YYYY
+	PeriodStart *string `form:"period_start"` // MM-YYYY
+	PeriodEnd   *string `form:"period_end"`   // MM-YYYY
 }
 
 func (r SumOfSubscriptionPricesRequest) ToParams() (model.SumOfSubscriptionPricesParams, error) {
@@ -149,17 +149,21 @@ func (r SumOfSubscriptionPricesRequest) ToParams() (model.SumOfSubscriptionPrice
 		params.UserID = &uid
 	}
 
-	start, err := time.Parse(dateLayout, r.PeriodStart)
-	if err != nil {
-		return params, err
+	if r.PeriodStart != nil {
+		start, err := time.Parse(dateLayout, *r.PeriodStart)
+		if err != nil {
+			return params, err
+		}
+		params.PeriodStart = &start
 	}
-	params.PeriodStart = start
 
-	end, err := time.Parse(dateLayout, r.PeriodEnd)
-	if err != nil {
-		return params, err
+	if r.PeriodEnd != nil {
+		end, err := time.Parse(dateLayout, *r.PeriodEnd)
+		if err != nil {
+			return params, err
+		}
+		params.PeriodEnd = &end
 	}
-	params.PeriodEnd = end
 
 	return params, nil
 }

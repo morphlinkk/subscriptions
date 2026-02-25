@@ -71,5 +71,11 @@ func (s *subscriptionService) ListSubscriptions(ctx context.Context, params mode
 }
 
 func (s *subscriptionService) GetSumOfSubscriptionPrices(ctx context.Context, params model.SumOfSubscriptionPricesParams) (int64, error) {
+	if params.PeriodStart == nil {
+		return 0, errors.New("period_start is required")
+	}
+	if params.PeriodEnd == nil {
+		return 0, errors.New("period_end is required")
+	}
 	return s.repo.GetSumOfSubscriptionPrices(ctx, &params)
 }

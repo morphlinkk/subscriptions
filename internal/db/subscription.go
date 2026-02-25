@@ -134,8 +134,7 @@ func (q *Queries) ListSubscriptions(ctx context.Context, params model.ListSubscr
 
 const SumOfSubscriptionPricesQuery = `
 	SELECT 
-			COALESCE(SUM(price), 0) AS total_price,
-			COUNT(*) AS total_subscriptions
+			COALESCE(SUM(price), 0) AS total_price
 	FROM subscriptions
 	WHERE ($1::uuid IS NULL OR user_id = $1)
 		AND ($2::text IS NULL OR service_name = $2)
